@@ -20,7 +20,7 @@ Or use the skills CLI:
 npx skills add themattcohen/writing-standard --skill writing-standard --agent claude-code --global --yes
 ```
 
-For the Claude app or claude.ai, download `writing-standard.zip` from the latest release, then go to Settings, Capabilities, Skills, choose Upload skill, and pick the zip. Turn the skill on after it uploads. Code execution must be on for the linter to run there.
+For the Claude app or claude.ai, download `writing-standard.zip` from the latest release, then open Customize in the left sidebar, choose Skills, click Add skill, then Upload skill, and pick the zip without unzipping it. Skills need code execution, which is under Settings, Capabilities, Code execution and file creation.
 
 ## Use
 
