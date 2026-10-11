@@ -1,0 +1,413 @@
+# Banned and watched language
+
+This file is the data behind the linter and the word lists for editors. `scripts/lint.py` parses it, so the format is strict. Each section below holds only `- item` lines. An optional note may follow the term after a vertical bar, and the linter ignores everything after the bar. Every term is lowercase and uses straight apostrophes. Words match on word boundaries without regard to case.
+
+These lists are perishable. Word habits change with every model release, and the lists should be pruned and dated. Last reviewed 2026-10-11. Dual-use words that have ordinary literal meanings (unlock, harness, showcase, landscape) are watched and not banned. The rules that explain each list are in `standard.md`, Part B.
+
+## Banned words
+- delve
+- delves
+- delved
+- delving
+- foster
+- fosters
+- fostered
+- fostering
+- leverage | verb use; the noun in finance and mechanics is fine
+- leverages
+- leveraged
+- leveraging
+- utilize
+- utilizes
+- utilized
+- utilizing
+- facilitate
+- facilitates
+- facilitated
+- facilitating
+- empower
+- empowers
+- empowered
+- empowering
+- streamline
+- streamlines
+- streamlined
+- streamlining
+- robust | figurative use; keep technical uses such as a robust standard error
+- cutting-edge
+- tapestry | abstract use
+- multifaceted
+- meticulous
+- meticulously
+- intricate
+- intricacies
+- paramount
+- transformative
+- elevate
+- elevates
+- elevating
+- embark
+- embarks
+- embarked
+- embarking
+- supercharge
+- supercharges
+- supercharged
+- ever-evolving
+- seamless
+- seamlessly
+- groundbreaking
+- revolutionize
+- revolutionizes
+- revolutionized
+- revolutionizing
+- synergy
+- synergies
+- game-changer
+- game-changing
+- pivotal
+- underscore | verb use
+- underscores
+- underscored
+- underscoring
+- bolster
+- bolsters
+- bolstered
+- bolstering
+- garner
+- garners
+- garnered
+- garnering
+- vibrant
+- nestled
+- renowned
+- breathtaking
+- must-visit
+- stunning
+- furthermore
+- moreover
+- blazingly
+- magnificent
+- holistic
+
+## Banned phrases
+- paradigm shift
+- this is huge
+- this changes everything
+- it's worth noting
+- it is worth noting
+- it's important to note
+- it is important to note
+- it is worth mentioning
+- at the end of the day
+- when it comes to
+- at its core
+- in today's world
+- in today's digital landscape
+- in the age of
+- in the world of
+- in a world where
+- in the ever-evolving
+- the reality is
+- the truth is,
+- in this article
+- in this section, we'll
+- let's dive in
+- let's explore
+- let's break this down
+- now let's look at
+- here's what you need to know
+- without further ado
+- here's the thing
+- the thing is
+- here's what i mean
+- here's why that matters
+- this matters because
+- let me be clear
+- i'll be honest
+- the uncomfortable truth is
+- what nobody tells you
+- here's what nobody tells you
+- the part everyone misses
+- what most people get wrong
+- the real question is
+- the heart of the matter
+- the deeper issue
+- let that sink in
+- read that again
+- make no mistake
+- plot twist
+- what if i told you
+- think about it:
+- the key point is
+- the key insight is
+- as you can see
+- this distinction matters
+- stands as a testament
+- serves as a testament
+- a testament to
+- marks a pivotal moment
+- plays a vital role
+- plays a key role
+- plays a crucial role
+- plays a pivotal role
+- solidifies its position
+- underscores its significance
+- underscores its importance
+- indelible mark
+- setting the stage for
+- evolving landscape
+- experts agree
+- experts argue
+- studies show
+- industry reports
+- observers have cited
+- many argue
+- widely regarded as
+- it is believed that
+- in conclusion
+- in summary
+- to sum up
+- one thing shapes
+- 100% secure
+- harness the power
+- unlock the potential
+- deep dive
+- dive into
+- rich tapestry
+- the future isn't coming
+- the future is already here
+- the future looks bright
+- exciting times ahead
+- a step in the right direction
+- closing the loop
+- i hope this email finds you well
+- i hope this message finds you well
+- apologize for any inconvenience
+- carefully reviewed
+- and that's okay
+- i promise
+- the rest of this essay
+- let me walk you through
+- as we'll see
+- but that's another post
+- you already know this, but
+- this shows the importance of
+- the message was clear
+- game changer
+- game changing
+- and that is okay
+
+## Performative candor
+- we will be straight with you
+- we'll be straight with you
+- let's be honest
+- here's the truth
+- no sugarcoating
+- real talk
+- i'll level with you
+- to be candid
+- i'm going to be honest
+- i'll say it again
+- can we talk about
+
+## Chatbot residue
+- i hope this helps
+- great question
+- certainly!
+- of course!
+- you're absolutely right
+- should i continue
+- feel free to
+- is there anything else
+- more detailed breakdown
+
+## Knowledge disclaimers
+- as of my last
+- training update
+- as an ai
+- as a large language model
+- as an ai language model
+- i cannot browse
+- while specific details are limited
+- while specific details are scarce
+- based on available information
+- not widely documented
+- not widely available
+- not publicly available
+- in the provided sources
+- in the available sources
+- does not by itself establish
+- my training data
+- my last training update
+- my knowledge cutoff
+
+## Assistant-only phrases
+- happy to help
+- let me know
+- feel free
+- i think
+- i believe
+- i feel
+- i'd recommend
+- i'd suggest
+- i'm sorry
+- sorry for the confusion
+- my bad
+- apologies
+- my apologies
+- i apologize
+- i've gone ahead and
+- i just wanted to
+- just wanted to
+- hope that helps
+- hi there
+- hey there
+- would you like
+- want me to
+- let me know if
+- here is a
+
+## Watched words
+- just
+- literally
+- honestly
+- simply
+- actually
+- truly
+- fundamentally
+- importantly
+- crucially
+- inherently
+- inevitably
+- genuinely
+- deeply
+- interestingly
+- crucial
+- key
+- valuable
+- enhance
+- enhances
+- enhanced
+- enhancing
+- highlight
+- highlights
+- highlighted
+- highlighting
+- emphasizing
+- enduring
+- interplay
+- quietly
+- profound
+- exemplifies
+- nuanced
+- comprehensive
+- illuminate
+- endeavor
+- challenge
+- matters
+- practical
+- prioritize
+- steady
+- universally
+- dependable
+- echoed
+- clearer
+- indeed
+- state-of-the-art
+- diverse
+- commitment
+- unlock
+- unlocks
+- unlocked
+- unlocking
+- harness
+- harnesses
+- harnessed
+- harnessing
+- showcase
+- showcases
+- showcased
+- showcasing
+- testament
+- landscape
+- journey
+- additionally
+- beacon
+- realm
+- realms
+
+## Watched phrases
+- in terms of
+- with regard to
+- in order to
+- going forward
+- moving forward
+- associated with
+- in association with
+- in connection with
+- linked to
+- tied to
+- i'm not saying
+- to be clear
+- don't get me wrong
+- this isn't about
+- a tempting approach
+- one might be tempted
+- you might think
+- the stakes are high
+- the implications are significant
+- the reasons are structural
+- the consequences are real
+- this is what x actually looks like
+- actually matters
+- despite these challenges
+- future outlook
+- awards and recognition
+- challenges and legacy
+- commitment to
+- diverse array
+- in the heart of
+- natural beauty
+- rich and
+- serves as
+- stands as
+- functions as
+- operates as
+- represents a
+- boasts a
+- refers to
+- align with
+- resonate with
+- focal point
+- key turning point
+- deeply rooted
+- comprehensive guide
+- full stop
+- click here
+- sign up now
+- get a quote
+- look no further
+
+## Jargon swaps
+- navigate -> handle
+- unpack -> explain
+- lean into -> accept
+- double down -> commit
+- take a step back -> reconsider
+- circle back -> return to
+- on the same page -> agreed
+- deep dive -> analysis
+- going forward -> next
+- moving forward -> next
+- utilize -> use
+- leverage -> use
+- facilitate -> help
+- in order to -> to
+- has the ability to -> can
+- made a decision -> decided
+- serves as -> is
+- authored -> wrote
+- relocated -> moved
+- attempted -> tried
+- passed away -> died
