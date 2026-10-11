@@ -1,6 +1,11 @@
 ---
 name: writing-standard
-description: Write, edit, or detect AI slop in any prose (emails, replies, reports, proposals, site copy, docs). Use before drafting anything a human will read, when asked to de-slop or humanize a draft, when asked whether text reads as AI, or to lint a file. Three jobs: write to the standard, edit a draft with the minimum effective change, detect and quote patterns without rewriting.
+description: Writes, edits, and flags AI-sounding prose in emails, replies, reports, proposals, and docs. Use before drafting text a person will read, to de-slop a draft, or to lint a file.
+license: MIT
+compatibility: The optional linter needs Python 3.10 or newer, standard library only.
+metadata:
+  author: Matt Cohen
+  version: "1.1.0"
 ---
 
 # Writing standard
@@ -43,10 +48,10 @@ The same sentence is right in one voice and wrong in another. Rules and exemplar
 1. Read the whole draft. Identify the core point and the voice traits to keep. Ask for the point if it is unclear, and ask who the reader is if that is unclear.
 2. Read `references/standard.md` for the rules and `references/banned.md` for the word lists.
 3. Edit structure first, then words. A word hit alone is weak evidence, and a structure repeated across the text is strong evidence.
-4. For a file, run the linter and fix every error. It lives at `scripts/lint.py` in the folder holding this SKILL.md, which is `~/.claude/skills/writing-standard` for Claude Code installs. Use `python3` where `python` is not on the path.
+4. For a file, run the linter and fix every error. It lives at `scripts/lint.py` in this skill's folder. Run it from that folder, and use `python` where `python3` is not on the path.
 
    ```
-   python3 ~/.claude/skills/writing-standard/scripts/lint.py check <file> --mode <prose|email|assistant|plain>
+   python3 scripts/lint.py check <file> --mode <prose|email|assistant|plain>
    ```
 
 5. Re-read as the recipient would. Confirm the point survived, no facts were added, the voice is the writer's, and no pattern was swapped for a sibling.

@@ -4,6 +4,16 @@ This is the rule set behind the `writing-standard` skill, ordered by durability:
 
 Each rule has a Before line, an After line, a severity (`error` fails the linter, `warning` asks for a second look), the lint id the linter reports, and sources. Modes are `assistant`, `email`, `prose`, and `plain`. Em dash and en dash characters appear only inside fenced examples.
 
+Contents:
+
+- Part A: structure (contrasts, lead-ins, rhythm, endings)
+- Part B: words and phrases (banned and watched lists, jargon, chat leftovers)
+- Part C: formatting and punctuation (dashes, emoji, headings, lists)
+- Part D: claims and numbers
+- Part E: voice by author
+- Part F: judgment rules and process
+- Conflicts between sources, signs that are not evidence of slop, rule index
+
 ## Part A: structure
 
 Structure is the most durable layer. A draft can pass every word list and still read as generated because its sentence and paragraph shapes repeat, so fix these first.

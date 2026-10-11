@@ -17,8 +17,10 @@ git clone https://github.com/themattcohen/writing-standard ~/.claude/skills/writ
 Or use the skills CLI:
 
 ```
-npx skills add themattcohen/writing-standard --skill writing-standard --global --yes
+npx skills add themattcohen/writing-standard --skill writing-standard --agent claude-code --global --yes
 ```
+
+For the Claude app or claude.ai, download `writing-standard.zip` from the latest release, then go to Settings, Capabilities, Skills, choose Upload skill, and pick the zip. Turn the skill on after it uploads. Code execution must be on for the linter to run there.
 
 ## Use
 

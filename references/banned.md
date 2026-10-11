@@ -4,6 +4,8 @@ This file is the data behind the linter and the word lists for editors. `scripts
 
 These lists are perishable. Word habits change with every model release, and the lists should be pruned and dated. Last reviewed 2026-10-11. Dual-use words that have ordinary literal meanings (unlock, harness, showcase, landscape) are watched and not banned. The rules that explain each list are in `standard.md`, Part B.
 
+Sections in order: banned words, banned phrases, performative candor, chatbot residue, knowledge disclaimers, assistant-only phrases, watched words, watched phrases, jargon swaps.
+
 ## Banned words
 - delve
 - delves
