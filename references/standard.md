@@ -385,6 +385,7 @@ These rules have no lint id.
 - Show, do not tell: cut labels such as "this is genuinely hard" and let the facts carry the weight (no-ai-slop; stop-slop).
 - Passive voice is a weak signal alone. Fix it when it hides the actor, and keep it where the actor is unknown (humanizer s11).
 - Synonym cycling is a weak rule: repeat the clear word instead of rotating names for variety (no-ai-slop).
+- Padding: a draft can pass every list and still say 15 words of content in 100. Cut sentences that restate the attachment or the thread, explanations of why a question is asked, connective filler ("meaning", "which is that"), and remedies nobody asked for. A short point written as a long chained sentence is the same failure. Cut each surviving sentence until another word would lose meaning (owner note, 2026-10-12).
 - Do not write about the document ("the table below compares") or re-explain what the reader knows. Lead with the decision and keep one fact the reader lacks (humanizer s25, s26).
 - Put the reader in the room: "you" beats "people" (stop-slop). Avoid false balance ("while X, also Y") with no contrast (claude-blog).
 - Docs state what is true now. Rewrite on a decision change, with no changelog of reversals inside the document (owner note, 2026-08-25).
@@ -412,6 +413,7 @@ The public sources disagree in places, and this standard resolves each as follow
 | Passive voice, synonym cycling | Weak rules, fixed only when they hide the actor or confuse the reader. |
 | Wh- openers | Not a rule. Only one source has it. |
 | Scoring | None. Detectors are error-prone, and a score invites writing to the number. |
+| Chained sentences vs. density | The owner's email voice chains connected thoughts, and the owner also rejects padding. Density wins: chain only connected thoughts, and never lengthen a short point to sound human (owner note, 2026-10-12). |
 | "I think", parentheticals | Errors in assistant replies, allowed in the owner's email voice. The author decides. |
 | Self-consistency | This repo's own files are linted, since a peer source breaks its own dash rule. |
 

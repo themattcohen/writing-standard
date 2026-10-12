@@ -31,19 +31,44 @@ Illustrative, not from the owner:
 
 Claude drafts an email that goes out under the owner's name. The owner reads it and sends it without rewriting.
 
-- Chain related thoughts into longer sentences with "and", "which", "so", and "because".
-- At most one aside in parentheses. Name the actor. Use contractions.
-- Vary certainty: "I think" on one point, a flat statement on another.
-- Lists use asterisk bullets of unequal length, never numbered items with matching shapes.
-- No short-long-short metronome, no fragment verdicts, no tidy kicker, no colons as structure, no throat-clearing opener, no "hope this finds you well", no em dashes.
-- Greetings are allowed. The sign-off is a bare "Thanks," with nothing after it.
+Density comes first. The owner rejected a draft that read like generated text run through a thesaurus, "using 100 words to say 15 words of content." Every rule below serves that one.
+
+- Write the 15 words. Before drafting, list what the reader does not already have and what the owner needs from them. Say those things and stop. Whatever the attachment, the thread, or the last call already says gets cut or one pointing clause.
+- Short sentences are fine when the thought is short. Chain thoughts with "and", "so", "which", and "because" only when they are connected. Never lengthen a short point to make it sound human.
+- One ask per point, phrased as a question when it is one ("What is it solving for?"). Do not explain why you are asking unless the reader would be lost without it.
+- When the reader owns the work, say what you found and ask for their reasoning. Do not prescribe a remedy the owner did not ask for.
+- Name the actor and the next step ("the client is sending me the invoices"). Use contractions. Vary certainty: "I think" on one point, a flat statement on another.
+- At most one aside in parentheses.
+- Lists use asterisk bullets of unequal length. Each bullet opens with its handle (an id or a name) and reaches the point in the same sentence. Never numbered items with matching shapes.
+- No phrasing only a writer would choose: "weigh rather than lose", "the ones I'd read first", "in deal terms, meaning", "where we could size that". Use what the owner would say across a table.
+- No short-long-short metronome, no fragment verdicts, no tidy kicker, no colons as structure, no throat-clearing opener ("A few things up front"), no "hope this finds you well", no em dashes.
+- Greetings are allowed. The sign-off is a bare "Thanks," and the owner adds his name.
 - Nothing is sent without the owner's approval, so stage a draft.
 
-Illustrative, not from the owner:
+The density test, before the draft goes to the owner:
 
-> Before: Delivery slipped. The truck broke down. We lost a day. New date is Friday. Sorry for the trouble.
->
-> After: The delivery slipped to Friday because the truck broke down on the way and we lost a day getting a replacement, so I'd plan around the new date and tell me if Thursday matters for you.
+1. Count the body. A cover email for an attachment is usually under 200 words.
+2. Delete every sentence whose loss the reader would not notice.
+3. Rewrite at half length any sentence that half the words would carry.
+4. Read it aloud as the owner, and cut any phrase he would not say.
+
+Before (a cover-email bullet the owner rejected; names and figures removed):
+
+> The reserve, item 3. A buyer's accountants are going to ask what it's for, so we'd like a paragraph from you on that in deal terms, meaning headline earnings, the earnout base and cash at close, plus how you sized it and which way of presenting it you think gets the seller the most cash at close. If it's standing in for collectability, named reserves on the two slow accounts plus a loss rate on the aging would be easier to defend.
+
+After (the owner's reaction was "much better"):
+
+> * Item 3, the reserve, is a question. What is it solving for (headline earnings, the earnout base or cash at close)? Put the logic in your change log.
+
+The rewrite cut about 80 words to 25, dropped the remedy nobody asked for, and turned the request into the question it was.
+
+Before:
+
+> On the vendor, item 7, the change on the January invoice went in after your export, because the client pays one large invoice down monthly and asked for the balance to move into the next annual invoice. The work didn't change, so revenue stays as you have it and the balance shows as unbilled at the cutoff, and the new invoice gets recognized a twelfth a month net of what it carries over.
+
+After:
+
+> * Item 7 is an FYI. Your spread on that invoice is right, and the change on it is billing moved into the next annual invoice, which goes in the pack.
 
 `--mode email` allows greetings, "I think", and one parenthetical. It errors on throat-clearing, em dashes, and clerk tone, and it warns on the metronome, kickers, symmetric lists, and a sign-off other than "Thanks,".
 
@@ -57,6 +82,8 @@ The firm writes to a client or prospect who will act on the text.
 - Plain words, and no sentence that could sit unchanged on a competitor's site.
 - Invent no testimonials, counters, logos, or urgency, and use no emoji or em dashes.
 - A repeat deliverable is the prior final with only the client fields swapped.
+- Frame every item by what the reader has to do. A fix list labels each item Fix (the reader changes something), Question (the reader's reasoning comes first), or FYI (already right; one or two sentences). Do not dress an FYI as a fix or a question as a remedy.
+- Each item says what was found and what to do, in about 45 words. Cell references and figures stay exact, and the prose around them gets cut.
 - Soften an aggressive draft and keep its message, then run a full pass before the owner reviews it.
 
 Illustrative, not from the owner:
