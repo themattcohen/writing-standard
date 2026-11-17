@@ -1,10 +1,12 @@
 # writing-standard
 
-This repo packages a standard, a Claude Code skill, and a linter that remove the patterns that make prose read as generated.
+A standard, a Claude Code skill, and a linter that remove the patterns that make prose read as generated. Executive-document rules are the baseline, covering label headlines, facts without reasons, short paragraphs, and a word budget.
 
-Generated text has habits: staged openers, not-X-but-Y contrasts, closing kickers, symmetric lists, inflated vocabulary, and chat leftovers. Word lists catch some and go stale with each model release, so this repo orders its rules by durability, with structure first and dated word lists second. It holds the standard, a skill that applies it in three jobs (write, edit, detect), and a dependency-free linter.
+Structure rules come first and dated word lists second, since word lists go stale with each model release. The skill writes, edits, and detects.
 
-The owner is the repo author, Matt Cohen. The email sign-off and assistant-name rules encode the owner's house conventions, and a fork changes them with the flags below or by editing `references/banned.md`. Requirements: Python 3.10 or newer.
+The owner is the repo author, Matt Cohen. The email sign-off and assistant-name rules are house conventions; a fork changes them with the flags below or in `references/banned.md`.
+
+Requirements: Python 3.10 or newer, standard library only.
 
 ## Install
 
@@ -20,30 +22,43 @@ Or use the skills CLI:
 npx skills add themattcohen/writing-standard --skill writing-standard --agent claude-code --global --yes
 ```
 
-For the Claude app or claude.ai, download `writing-standard.zip` from the latest release, then open Customize in the left sidebar, choose Skills, click Add skill, then Upload skill, and pick the zip without unzipping it. Skills need code execution, which is under Settings, Capabilities, Code execution and file creation.
+For the Claude app or claude.ai, download `writing-standard.zip` from the latest release. Open Customize, then Skills, Add skill, and Upload skill, and pick the zip without unzipping it.
+
+Skills need code execution, under Settings, Capabilities, Code execution and file creation.
 
 ## Use
 
-In Claude Code, run `/writing-standard` and describe the job. Write returns finished text. Edit returns the full edited text plus a short "What changed" list. Detect names each pattern with the line quoted and a short fix, and it does not rewrite, score, or guess who wrote the text.
-
-The linter runs without a model:
+In Claude Code, run `/writing-standard` and describe the job. The linter runs without a model:
 
 ```
+python3 ~/.claude/skills/writing-standard/scripts/lint.py check path/to/file.md
 python3 ~/.claude/skills/writing-standard/scripts/lint.py check path/to/file.md --mode email
+python3 ~/.claude/skills/writing-standard/scripts/lint.py check brief.html --from html --max-words 1500
+pdftotext brief.pdf - | python3 ~/.claude/skills/writing-standard/scripts/lint.py check -
 python3 ~/.claude/skills/writing-standard/scripts/lint.py rules
 ```
 
-From a clone, `python3 scripts/lint.py ...` works too.
+| Flag | Effect |
+|---|---|
+| `--mode` | `prose` (default), `email`, `assistant`, or `plain`; `brief` is an alias of `prose` |
+| `--from html` | Strips tags first; h1 to h6 count as headings, table rows become table lines |
+| `--budget N` | Prose words allowed per section, default 120 |
+| `--max-words N` | Cap on the document total, tables and headings included |
+| `--strict` | Fails on warnings too |
+| `--json` | Prints JSON; prose mode adds a `words` report per file |
+| `--name NAME` | Flags that name in assistant mode |
+| `--signoff TEXT` | Expected email sign-off, default `Thanks,`; an empty string turns it off |
+| `--banned PATH` | Reads an alternate word list |
 
-- `--mode` is `prose`, `email`, `assistant`, or `plain`, one per author. See `references/voice.md`.
-- Exit codes are 0 clean, 1 errors, 2 usage. `--strict` fails on warnings too, and `--json` prints JSON.
-- A path of `-` reads standard input, and `rules` lists every rule id.
-- `--name NAME` flags that name in assistant mode. `--banned PATH` reads an alternate word list.
-- `--signoff TEXT` sets the expected email sign-off. The default is `Thanks,`, and an empty string turns the rule off.
+Exit codes are 0 clean, 1 errors, and 2 usage, and a path of `-` reads standard input. The linter counts and names findings and does not score.
 
-The linter counts and names findings and does not score.
+## Extracted text
 
-## What is inside
+Text from `pdftotext` (run it without `-layout`) or a browser copy has no `#` markers. In prose mode with no markdown headings, a short standalone line without end punctuation counts as a heading.
+
+Page headers and footers are skipped: lines that repeat with only digits changed, or whose first three words repeat on five or more lines. Line numbers from `--from html` refer to the extracted text.
+
+## Contents
 
 ```
 SKILL.md                  The skill
@@ -55,7 +70,7 @@ scripts/lint.py           The linter
 tests/                    Linter tests
 ```
 
-no-ai-slop names about twenty patterns and has no entry for chatbot residue, forced triads, or placeholders. humanizer adds strength ratings and false-positive guards, and stop-slop adds jargon swaps and a scoring rubric. This repo merges them, resolves their conflicts, separates author voices, and rejects scoring.
+Peer projects name the patterns separately. This repo merges them, resolves their conflicts, separates author voices, and rejects scoring.
 
 ## Credits
 
@@ -66,4 +81,6 @@ no-ai-slop names about twenty patterns and has no entry for chatbot residue, for
 
 ## License
 
-MIT, copyright 2026 Matt Cohen. Some rule wording and examples are adapted from the MIT-licensed projects above, and their notices in `LICENSE` apply to those portions. Wikipedia appears as word lists and paraphrase under CC BY-SA 4.0, with the revision cited.
+MIT, copyright 2026 Matt Cohen. Some rule wording and examples are adapted from the MIT-licensed projects above, and their notices in `LICENSE` apply to those portions.
+
+Wikipedia appears as word lists and paraphrase under CC BY-SA 4.0, with the revision cited.

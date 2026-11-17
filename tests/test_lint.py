@@ -355,7 +355,7 @@ POSITIVE: Dict[str, List[Case]] = {
     ],
     "title-case-heading": [("# Doc\n\n## Getting Started With Modern Teams\n\nOne here. Two here.\n", P)],
     "heading-restated": [("# Doc\n\n## Release process\n\nThe release process starts on Monday. It runs for a week.\n", P)],
-    "tiny-section": [("# Doc\n\n## Alpha\n\nOnly one sentence here.\n\n## Beta\n\nTwo here. And here.\n", P)],
+    "tiny-section": [("# Doc\n\n## Alpha\n\nOnly one sentence here.\n\n## Beta\n\nTwo here. And here.\n", "assistant")],
     "question-headings": [("# Doc\n\n## Why now?\n\nText here. More here.\n\n## Why us?\n\nText here. More here.\n\n## Why not?\n\nText here. More here.\n", P)],
     "symmetric-list": [
         ("- Open the file.\n- Read the file.\n- Close the file.\n", P),
@@ -369,6 +369,58 @@ POSITIVE: Dict[str, List[Case]] = {
     "dollar-amount": [("The fee is $40 per seat.", P), ("It cost 50 dollars.", P), ("It cost 20 USD.", P), ("It cost $5k total.", P)],
     "signoff": [("Hello team.\n\nBest,\n", "email"), ("Hello team.\n\nThanks,\nMatt\n", "email"), ("Hello team.\n\nRegards,\nMatt\n", "email")],
     "found-you-well": [("I hope this email finds you well.", P), ("I trust this message finds you well.", "email")],
+    "headline-slogan": [
+        ("# Plan\n\n## Four tiers, priced for the care\n\nOne line.\n", P),
+        ("## Above the market, beside the branded product\n", P),
+        ("## What we did and what we recommend\n", P),
+        ("## Why one price\n", P),
+        ("## The first group is people already enrolled\n", P),
+        ("## Where the price sits\n", P),
+        ("## A specialist team on a short contract with an exit\n", P),
+        ("Intro line here.\n\nFour tiers, priced for the care\n\nBody text.\n", P),
+    ],
+    "justification-tic": [
+        ("We kept the fee because drivers know it.", P),
+        ("The form is shorter, which is why it converts.", P),
+        ("The fee is flat, so the quote is simple.", P),
+        ("For this reason, the fee stays.", P),
+        ("The fee is flat. That means the quote is simple.", P),
+        ("We moved the stop so that drivers skip the bridge.", "email"),
+    ],
+    "thesis-sentence": [
+        ("The credential is the product.", P),
+        ("The complaint is the face.", P),
+        ("Everything else in this brief is built around that fee.", P),
+        ("This summary is the whole of it.", P),
+        ("The rest is evidence.", P),
+        ("Nobody can sell it cheaper.", P),
+        ("Courier apps are faster, and we do not try.", "email"),
+    ],
+    "process-narration": [
+        ("Over four days we rebuilt the list.", P),
+        ("We looked at 24 sellers.", P),
+        ("This page covers the plan.", P),
+        ("In this brief, the fee changes.", P),
+        ("We reviewed the logs on Monday.", "email"),
+    ],
+    "chart-restatement": [
+        ("The chart shows the stops per shift.", P),
+        ("Reading the chart, stops rise.", P),
+        ("As the table shows, fees fall.", P),
+        ("As shown above, fees fall.", P),
+        ("# Doc\n\n## Reading the results\n\n| a | b |\n|---|---|\n| 1 | 2 |\n", P),
+    ],
+    "paragraph-density": [
+        ("The fee stays. The zone moves. The map changes.", P),
+        ("The north zone keeps its current fee for the next quarter while the south zone moves to a flat fee "
+         "that replaces the per-stop charge drivers have used since the depot opened and the dispatcher keeps the "
+         "old map for one month.", P),
+        ("- The north zone keeps its current fee for the next quarter while the south zone moves to a flat fee\n", P),
+    ],
+    "word-budget": [
+        ("# Doc\n\n## Dock\n\n" + "The crew moved the pallets to the east dock and logged each one by hand. " * 9 + "\n", P),
+        ("The crew moved the pallets to the east dock and logged each one by hand. " * 9 + "\n", P),
+    ],
 }
 
 NEGATIVE: Dict[str, List[Case]] = {
@@ -463,6 +515,8 @@ NEGATIVE: Dict[str, List[Case]] = {
         ("# Doc\n\n## Alpha\n\nOne here. Two here.\n\n## Beta\n\nTwo here. And here.\n", P),
         ("# Doc\n\n## Usage\n\n```\nrun it\n```\n\n## Next\n\nTwo here. And here.\n", P),
         ("# Doc\n\n## Parent\n\n### Child\n\nOne here. Two here.\n", P),
+        ("# Doc\n\n## Costs\n\n| a | b |\n|---|---|\n| 1 | 2 |\n\n## Next\n\nOne here. Two here.\n", "assistant"),
+        ("# Doc\n\n## Alpha\n\nOnly one sentence here.\n\n## Beta\n\nTwo here. And here.\n", P),
     ],
     "question-headings": [("# Doc\n\n## Why now?\n\nText here. More here.\n\n## Plan\n\nText here. More here.\n\n## Costs\n\nText here. More here.\n", P)],
     "symmetric-list": [("- Open the file and read the long header.\n- Run it.\n- Check that the output file has the expected size afterward.\n", P)],
@@ -474,6 +528,42 @@ NEGATIVE: Dict[str, List[Case]] = {
     "dollar-amount": [("It rose 40 percent.", P)],
     "signoff": [("Hello team.\n\nThanks,\n", "email"), ("Hello team.\n\nBest,\n", P)],
     "found-you-well": [("I wrote to ask about the invoice.", P)],
+    "headline-slogan": [
+        ("# Plan\n\n## Membership tiers\n\nOne line.\n", P),
+        ("## Prices, terms and dates\n", P),
+        ("## Prepared for the board\n", P),
+        ("## Chief Executive Officer, North Office\n", P),
+        ("## Who buys\n", P),
+        ("Prepared for the operations lead\n\nBody text.\n", P),
+        ("## Four tiers, priced for the care\n", "email"),
+    ],
+    "justification-tic": [
+        ("The fee stays at the current rate.", P),
+        ("So far the fee holds.", P),
+        ("We kept the fee because drivers know it.", "assistant"),
+        ("We kept the fee because drivers know it.", "plain"),
+    ],
+    "thesis-sentence": [
+        ("The product ships on Monday.", P),
+        ("The key to the door is in the office.", P),
+        ("Everything else stays at list price.", P),
+        ("The cause is the cache.", P),
+    ],
+    "process-narration": [
+        ("The list has 24 sellers.", P),
+        ("This fee replaces the old one.", P),
+        ("Drivers looked at the map.", P),
+    ],
+    "chart-restatement": [("Stops rise in every zone.", P), ("Readings rose on Friday.", P), ("The chart shows stops.", "email")],
+    "paragraph-density": [
+        ("The fee stays. The zone moves.", P),
+        ("- The north zone keeps its current fee.\n", P),
+        ("The fee stays. The zone moves. The map changes.", "email"),
+    ],
+    "word-budget": [
+        ("# Doc\n\n## Dock\n\nThe crew moved the pallets.\n", P),
+        ("# Doc\n\n## Dock\n\n" + "The crew moved the pallets to the east dock and logged each one by hand. " * 9 + "\n", "email"),
+    ],
 }
 
 ALL_RULE_IDS = [r.id for r in lint.registry()]
@@ -589,7 +679,8 @@ def test_plain_mode_turns_off_heading_and_markdown_formatting_rules() -> None:
     text = "# Doc\n\n## Getting Started With Modern Teams\n\nOnly one sentence here.\n\n## Next\n\nTwo here. And here.\n\n---\n\nA **bold** word here.\n"
     prose = set(ids(text, "prose"))
     plain = set(ids(text, "plain"))
-    assert {"title-case-heading", "tiny-section", "horizontal-rule", "bold-decoration"} <= prose
+    assert {"title-case-heading", "horizontal-rule", "bold-decoration"} <= prose
+    assert "tiny-section" in ids(text, "assistant")
     assert not ({"title-case-heading", "tiny-section", "horizontal-rule", "bold-decoration"} & plain)
 
 
@@ -605,7 +696,7 @@ def test_name_requires_word_boundary_and_exact_case() -> None:
     assert "name" not in ids("Claude wrote it.", "assistant", None)
 
 
-def test_registry_has_all_54_rule_ids() -> None:
+def test_registry_has_all_61_rule_ids() -> None:
     expected = (
         "em-dash en-dash double-hyphen emoji banned-word banned-phrase watched-word watched-phrase jargon "
         "candor chatbot-residue knowledge-disclaimer placeholder leaked-markup binary-contrast lead-in "
@@ -614,9 +705,11 @@ def test_registry_has_all_54_rule_ids() -> None:
         "uniform-length kicker repeated-opening recap-ending bold-decoration title-case-heading "
         "heading-restated tiny-section question-headings horizontal-rule hedge-stack curly-quotes "
         "dollar-amount likely-cause markdown-in-plain greeting name apology filler-affect "
-        "first-person-feeling parenthetical signoff found-you-well symmetric-list superlative-unverified"
+        "first-person-feeling parenthetical signoff found-you-well symmetric-list superlative-unverified "
+        "headline-slogan justification-tic thesis-sentence process-narration chart-restatement "
+        "paragraph-density word-budget"
     ).split()
-    assert len(expected) == 54
+    assert len(expected) == 61
     assert sorted(ALL_RULE_IDS) == sorted(expected)
 
 
@@ -634,6 +727,7 @@ def test_findings_are_sorted_and_deterministic() -> None:
 # ---------------------------------------------------------------------------
 
 LINE_RE = re.compile(r'^.+:\d+:\d+: (ERROR|WARN) \[[a-z-]+\] .+: ".*"$')
+WORDS_RE = re.compile(r"^.+: \d+ words, \d+ sections, \d+ over the \d+-word section budget$")
 
 
 def test_cli_slop_fixture_fails_with_many_rules() -> None:
@@ -641,7 +735,8 @@ def test_cli_slop_fixture_fails_with_many_rules() -> None:
     assert p.returncode == 1
     out_lines = p.stdout.strip().splitlines()
     assert re.match(r"^\d+ errors, \d+ warnings in 1 files$", out_lines[-1])
-    assert all(LINE_RE.match(line) for line in out_lines[:-1]), out_lines
+    assert WORDS_RE.match(out_lines[-2]), out_lines[-2]
+    assert all(LINE_RE.match(line) for line in out_lines[:-2]), out_lines
     j = json.loads(check_cli(str(FIXTURES / "slop.md"), "--json").stdout)
     assert len({f["rule"] for f in j["findings"]}) >= 20
 
@@ -649,8 +744,9 @@ def test_cli_slop_fixture_fails_with_many_rules() -> None:
 def test_cli_clean_fixture_passes() -> None:
     p = check_cli(str(FIXTURES / "clean.md"))
     assert p.returncode == 0, p.stdout
-    assert p.stdout.strip() == "0 errors, 0 warnings in 1 files"
-    assert len((FIXTURES / "clean.md").read_text(encoding="utf-8").split()) >= 300
+    assert p.stdout.strip().splitlines()[-1] == "0 errors, 0 warnings in 1 files"
+    assert WORDS_RE.match(p.stdout.strip().splitlines()[0])
+    assert len((FIXTURES / "clean.md").read_text(encoding="utf-8").split()) >= 200
 
 
 def test_cli_clean_fixture_passes_in_assistant_mode_except_voice_rules() -> None:
@@ -679,7 +775,9 @@ def test_cli_strict_turns_warnings_into_failure(tmp_path: Path) -> None:
 def test_cli_json_has_documented_keys() -> None:
     p = check_cli(str(FIXTURES / "slop.md"), "--json")
     data = json.loads(p.stdout)
-    assert set(data) == {"files", "findings", "errors", "warnings"}
+    assert set(data) == {"files", "findings", "errors", "warnings", "words"}
+    email = json.loads(check_cli(str(FIXTURES / "slop.md"), "--json", "--mode", "email").stdout)
+    assert set(email) == {"files", "findings", "errors", "warnings"}
     assert data["errors"] == sum(1 for f in data["findings"] if f["severity"] == "ERROR")
     assert data["warnings"] == sum(1 for f in data["findings"] if f["severity"] == "WARN")
     assert set(data["findings"][0]) == {"path", "line", "col", "severity", "rule", "message", "text"}
@@ -743,11 +841,11 @@ def test_cli_default_banned_path_is_next_to_scripts() -> None:
 def test_cli_rules_text_and_json() -> None:
     p = cli("rules")
     assert p.returncode == 0
-    assert p.stdout.strip().splitlines()[-1] == "54 rules"
+    assert p.stdout.strip().splitlines()[-1] == "61 rules"
     for rid in ALL_RULE_IDS:
         assert re.search(r"^" + re.escape(rid) + r"\s", p.stdout, re.MULTILINE), rid
     j = json.loads(cli("rules", "--json").stdout)
-    assert j["count"] == 54 and len(j["rules"]) == 54
+    assert j["count"] == 61 and len(j["rules"]) == 61
     by_id = {r["id"]: r for r in j["rules"]}
     assert by_id["signoff"]["modes"] == ["email"]
     assert by_id["dollar-amount"]["mode_severity"] == {"assistant": "ERROR"}
@@ -891,8 +989,10 @@ def test_slop_fixtures_together_fire_every_rule() -> None:
     runs = [
         ("slop.md", "prose"),
         ("slop.md", "plain"),
+        ("slop.md", "assistant"),
         ("slop_assistant.md", "assistant"),
         ("slop_email.txt", "email"),
+        ("slop_brief.txt", "prose"),
     ]
     fired = set()
     for fname, mode in runs:
@@ -902,7 +1002,7 @@ def test_slop_fixtures_together_fire_every_rule() -> None:
 
 
 STANDARD = ROOT / "references" / "standard.md"
-ASSISTANT_RULES = {"greeting", "name", "apology", "filler-affect", "first-person-feeling", "parenthetical"}
+ASSISTANT_RULES = {"greeting", "name", "apology", "filler-affect", "first-person-feeling", "parenthetical", "tiny-section"}
 EMAIL_RULES = {"signoff", "found-you-well"}
 
 
@@ -978,3 +1078,133 @@ def test_standard_examples_agree_with_the_linter() -> None:
             failing.append(rid + " (After fires)")
     assert checked > 0
     assert not failing, "rules whose examples disagree with the linter: " + ", ".join(failing)
+
+
+# ---------------------------------------------------------------------------
+# Executive documents: the baseline for prose, partly for email
+# ---------------------------------------------------------------------------
+
+EXEC_RULES = {
+    "headline-slogan", "justification-tic", "thesis-sentence", "process-narration",
+    "chart-restatement", "paragraph-density", "word-budget",
+}
+EMAIL_EXEC_RULES = {"justification-tic", "thesis-sentence", "process-narration"}
+
+
+def test_executive_rules_run_by_default_and_partly_in_email() -> None:
+    by_id = {r.id: r for r in lint.registry()}
+    for rid in EXEC_RULES:
+        assert "prose" in by_id[rid].modes, rid
+        assert ("email" in by_id[rid].modes) == (rid in EMAIL_EXEC_RULES), rid
+        assert not ({"assistant", "plain"} & by_id[rid].modes), rid
+    assert lint.build_parser().parse_args(["check", "x.md"]).mode == "prose"
+
+
+def test_brief_mode_is_an_alias_of_prose() -> None:
+    text = (FIXTURES / "slop_brief.txt").read_text(encoding="utf-8")
+    assert lint.make_config("brief", BANNED).mode == "prose"
+    assert run(text, "brief") == run(text, "prose")
+    p = check_cli(str(FIXTURES / "slop_brief.txt"), "--mode", "brief", "--json")
+    assert p.returncode == 1 and EXEC_RULES <= {f["rule"] for f in json.loads(p.stdout)["findings"]}
+
+
+def test_brief_fixtures_fail_on_the_shape_and_pass_on_the_rewrite() -> None:
+    slop = run((FIXTURES / "slop_brief.txt").read_text(encoding="utf-8"))
+    assert EXEC_RULES <= {f.rule for f in slop}
+    clean = run((FIXTURES / "brief_clean.txt").read_text(encoding="utf-8"))
+    assert clean == [], clean
+
+
+def test_because_with_a_number_is_a_warning() -> None:
+    assert sev("The fee rose because fuel went up 12 percent.", "justification-tic") == ["WARN"]
+    assert sev("The fee rose because fuel went up.", "justification-tic") == ["ERROR"]
+    assert sev("Fuel went up 12 percent, so the fee rose.", "justification-tic") == ["ERROR"]
+
+
+def test_headline_messages_name_the_reasons() -> None:
+    f = [x for x in run("## Four tiers, priced for the care\n") if x.rule == "headline-slogan"][0]
+    assert "comma-joined two-part" in f.message and "priced for the" in f.message and "6 words" in f.message
+
+
+def test_plain_lines_become_headings_and_page_furniture_is_skipped() -> None:
+    text = (FIXTURES / "slop_brief.txt").read_text(encoding="utf-8")
+    doc = lint.Doc("t", text, lint.make_config("prose", BANNED))
+    heads = [doc.block_text(b) for b in doc.headings()]
+    assert "Where the new schedule sits" in heads
+    furniture = [doc.block_text(b) for b in doc.blocks if b.kind == "furniture"]
+    assert furniture == ["Route plan, page 1", "Route plan, page 2", "Route plan, page 3"]
+    assert not [f for f in run(text) if f.text.startswith("Route plan")]
+
+
+def test_plain_lines_are_not_promoted_when_markdown_headings_exist_or_outside_prose() -> None:
+    md = "# Doc\n\nFour tiers, priced for the care\n\nBody text.\n"
+    assert "headline-slogan" not in ids(md)
+    doc = lint.Doc("t", "Intro.\n\nShort line\n\nBody.\n", lint.make_config("email", BANNED))
+    assert not doc.headings()
+
+
+def test_sections_count_prose_words_and_skip_tables() -> None:
+    text = "# Doc\n\n## A\n\nOne two three.\n\n| x | y |\n|---|---|\n| 1 | 2 |\n\n## B\n\n- four five\n"
+    doc = lint.Doc("t", text, lint.make_config("prose", BANNED))
+    assert [s.words for s in lint.sections(doc)] == [0, 3, 2]
+    assert lint.total_words(doc) == 1 + 1 + 3 + 4 + 1 + 2
+
+
+def test_budget_and_max_words_are_configurable() -> None:
+    text = "# Doc\n\n## Dock\n\nThe crew moved twelve pallets to the east dock.\n"
+    tight = lint.make_config("prose", BANNED, budget=5)
+    msgs = [f.message for f in lint.lint_text("t", text, tight) if f.rule == "word-budget"]
+    assert msgs == ["section has 9 words of prose; the budget is 5 (--budget)"]
+    capped = lint.make_config("prose", BANNED, max_words=8)
+    msgs = [f.message for f in lint.lint_text("t", text, capped) if f.rule == "word-budget"]
+    assert msgs == ["document runs 11 words; the cap is 8 (--max-words)"]
+    with pytest.raises(lint.LintError):
+        lint.make_config("prose", BANNED, budget=0)
+
+
+def test_html_to_text_keeps_headings_bullets_and_rows() -> None:
+    html = (
+        "<html><head><title>Ignore me</title><style>h1{color:red}</style></head><body>"
+        "<h1>Plan</h1><h4>Four tiers, priced for the care</h4><p>The fee &amp; the map.</p>"
+        "<ul><li>First item</li><li>Second <b>item</b></li></ul>"
+        "<table><tr><th>Zone</th><th>Fee</th></tr><tr><td>North</td><td>Flat</td></tr></table>"
+        "<script>var x = 'because';</script></body></html>"
+    )
+    out = lint.html_to_text(html)
+    assert out.split("\n\n") == [
+        "# Plan", "#### Four tiers, priced for the care", "The fee & the map.",
+        "- First item", "- Second item", "| Zone | Fee |", "| North | Flat |\n",
+    ]
+
+
+def test_cli_from_html_flags_headings_and_reads_html_files_in_folders(tmp_path: Path) -> None:
+    page = tmp_path / "brief.html"
+    page.write_text("<h2>Where the price sits</h2><p>Fees are flat.</p>", encoding="utf-8")
+    (tmp_path / "notes.md").write_text("Clean text here.\n", encoding="utf-8")
+    p = check_cli(str(tmp_path), "--from", "html", "--json")
+    data = json.loads(p.stdout)
+    assert data["files"] == [str(page)]
+    assert [f["rule"] for f in data["findings"]] == ["headline-slogan"]
+    assert data["words"][str(page)]["total"] == 7
+
+
+def test_cli_budget_flags_and_word_report() -> None:
+    text = "# Doc\n\n## Dock\n\nThe crew moved twelve pallets to the east dock.\n"
+    ok = check_cli("-", stdin=text)
+    assert ok.returncode == 0
+    assert "<stdin>: 11 words, 2 sections, 0 over the 120-word section budget" in ok.stdout
+    tight = check_cli("-", "--budget", "5", stdin=text)
+    assert tight.returncode == 1 and "[word-budget]" in tight.stdout
+    assert "1 over the 5-word section budget" in tight.stdout
+    capped = json.loads(check_cli("-", "--max-words", "8", "--json", stdin=text).stdout)
+    assert capped["words"]["<stdin>"]["max_words"] == 8
+    assert any("cap is 8" in f["message"] for f in capped["findings"])
+    assert check_cli("-", "--budget", "0", stdin=text).returncode == 2
+    assert check_cli("-", "--max-words", "lots", stdin=text).returncode == 2
+
+
+def test_density_and_budget_skip_quoted_examples() -> None:
+    quoted = "> The fee stays. The zone moves. The map changes.\n\n- Before: The fee stays. The zone moves. The map changes.\n"
+    assert "paragraph-density" not in ids(quoted)
+    long = "> " + "The crew moved the pallets to the east dock and logged each one by hand. " * 9 + "\n"
+    assert "word-budget" not in ids("# Doc\n\n## Dock\n\n" + long)

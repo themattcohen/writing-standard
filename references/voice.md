@@ -1,12 +1,16 @@
 # Voice by author
 
-Identify the author before writing or editing, because a rule that is right for one author is wrong for another. Parts A to C and the general rules of D in `standard.md` apply to every author. This file adds what differs. "The owner" is the repo author, Matt Cohen, and a fork replaces these house conventions.
+Identify the author first. A rule that is right for one author is wrong for another.
+
+This file adds what differs from `standard.md`.
+
+"The owner" is the repo author, Matt Cohen, and a fork replaces these house conventions.
 
 | Register | Author | Linter mode |
 |---|---|---|
 | Assistant reply | Claude writing to the owner | `assistant` |
 | Owner's email | Claude drafting as the owner | `email` |
-| Client-facing document | Proposals, reports, site copy | `prose` |
+| Client-facing document | Reports, briefs, decks, proposals, site copy | `prose` (default; `brief` is an alias) |
 | Plain-text destination | Any author, where markdown does not render | `plain` |
 
 ## A. Assistant reply
@@ -31,26 +35,36 @@ Illustrative, not from the owner:
 
 Claude drafts an email that goes out under the owner's name. The owner reads it and sends it without rewriting.
 
-Density comes first. The owner rejected a draft that read like generated text run through a thesaurus, "using 100 words to say 15 words of content." Every rule below serves that one.
+Density comes first. The owner rejected a draft "using 100 words to say 15 words of content."
 
-- Write the 15 words. Before drafting, list what the reader does not already have and what the owner needs from them. Say those things and stop. Whatever the attachment, the thread, or the last call already says gets cut or one pointing clause.
-- Short sentences are fine when the thought is short. Chain thoughts with "and", "so", "which", and "because" only when they are connected. Never lengthen a short point to make it sound human.
-- One ask per point, phrased as a question when it is one ("What is it solving for?"). Do not explain why you are asking unless the reader would be lost without it.
-- When the reader owns the work, say what you found and ask for their reasoning. Do not prescribe a remedy the owner did not ask for.
-- Name the actor and the next step ("the client is sending me the invoices"). Use contractions. Vary certainty: "I think" on one point, a flat statement on another.
+### Content rules
+
+- Write the 15 words: what the reader lacks and what the owner needs from them. Cut what the attachment or thread already says.
+- State facts without attached reasons such as "because" or "which is why" (owner ruling 2026-11-17).
+- Never lengthen a short point to make it sound human.
+- One ask per point, phrased as a question when it is one ("What is it solving for?"). Do not explain why you ask.
+- When the reader owns the work, say what you found and ask for their reasoning. Prescribe no remedy.
+
+### Style rules
+
+- Name the actor and the next step ("the client is sending me the invoices"). Use contractions and vary certainty.
 - At most one aside in parentheses.
-- Lists use asterisk bullets of unequal length. Each bullet opens with its handle (an id or a name) and reaches the point in the same sentence. Never numbered items with matching shapes.
-- No phrasing only a writer would choose: "weigh rather than lose", "the ones I'd read first", "in deal terms, meaning", "where we could size that". Use what the owner would say across a table.
-- No short-long-short metronome, no fragment verdicts, no tidy kicker, no colons as structure, no throat-clearing opener ("A few things up front"), no "hope this finds you well", no em dashes.
+- Asterisk bullets of unequal length, each opening with its handle (an id or a name).
+- No writerly phrasing such as "weigh rather than lose" or "in deal terms, meaning".
+- No metronome, fragment verdicts, kickers, colons as structure, throat-clearing, or em dashes.
 - Greetings are allowed. The sign-off is a bare "Thanks," and the owner adds his name.
-- Nothing is sent without the owner's approval, so stage a draft.
+- Nothing is sent without the owner's approval. Stage a draft.
 
-The density test, before the draft goes to the owner:
+### Density test
+
+Run it before the draft goes to the owner.
 
 1. Count the body. A cover email for an attachment is usually under 200 words.
 2. Delete every sentence whose loss the reader would not notice.
 3. Rewrite at half length any sentence that half the words would carry.
 4. Read it aloud as the owner, and cut any phrase he would not say.
+
+### Email examples
 
 Before (a cover-email bullet the owner rejected; names and figures removed):
 
@@ -70,11 +84,15 @@ After:
 
 > * Item 7 is an FYI. Your spread on that invoice is right, and the change on it is billing moved into the next annual invoice, which goes in the pack.
 
-`--mode email` allows greetings, "I think", and one parenthetical. It errors on throat-clearing, em dashes, and clerk tone, and it warns on the metronome, kickers, symmetric lists, and a sign-off other than "Thanks,".
+`--mode email` allows greetings, "I think", and one parenthetical. It errors on throat-clearing, em dashes, clerk tone, justification tics, thesis sentences, and process narration.
+
+It warns on the metronome, kickers, symmetric lists, and a sign-off other than "Thanks,".
 
 ## C. Client-facing document
 
-The firm writes to a client or prospect who will act on the text.
+The firm writes to a client or prospect who will act on the text. The executive baseline in `SKILL.md` applies to every page.
+
+### Claims
 
 - Every public claim needs a measured, sourced, or owner-supplied figure, and no superlative stands without one.
 - No hype adjectives, and trade-offs are stated.
@@ -82,9 +100,13 @@ The firm writes to a client or prospect who will act on the text.
 - Plain words, and no sentence that could sit unchanged on a competitor's site.
 - Invent no testimonials, counters, logos, or urgency, and use no emoji or em dashes.
 - A repeat deliverable is the prior final with only the client fields swapped.
+### Fix lists
+
 - Frame every item by what the reader has to do. A fix list labels each item Fix (the reader changes something), Question (the reader's reasoning comes first), or FYI (already right; one or two sentences). Do not dress an FYI as a fix or a question as a remedy.
 - Each item says what was found and what to do, in about 45 words. Cell references and figures stay exact, and the prose around them gets cut.
 - Soften an aggressive draft and keep its message, then run a full pass before the owner reviews it.
+
+### Document example
 
 Illustrative, not from the owner:
 
@@ -92,11 +114,13 @@ Illustrative, not from the owner:
 >
 > After: The platform imports contact lists as CSV files and merges duplicate entries the same day. It does not yet read scanned paper forms.
 
-`--mode prose` applies the full rule set. Hype words are errors, and unverified superlatives are warnings that an editor treats as must-fix.
+`--mode prose` applies the full rule set, executive rules included. Hype words are errors, and unverified superlatives are warnings an editor treats as must-fix.
 
 ## D. Plain-text destinations
 
-`--mode plain` is for destinations that render no markdown, such as task-tracker descriptions. Use plain prose, uppercase line labels, bare URLs on their own line, and blank lines for breaks. No pound-sign headings, bold, link syntax, or code fences. Markdown found there is reported as `markdown-in-plain`.
+`--mode plain` is for destinations that render no markdown, such as task-tracker descriptions. Use uppercase line labels, bare URLs on their own line, and blank lines for breaks.
+
+Pound-sign headings, bold, link syntax, and code fences are reported as `markdown-in-plain`.
 
 ```text
 STATUS

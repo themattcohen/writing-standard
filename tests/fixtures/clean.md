@@ -1,25 +1,45 @@
 # Roof inspection notes
 
-We finished the roof inspection on Tuesday after three days of rain delays. The crew found two damaged areas near the chimney and a third patch where old flashing had lifted. I walked the whole surface with the contractor. He pointed out stains on the decking that I would have missed alone, and we agreed on a repair order before he left.
+The roof leaked at the chimney for at least one season. Repairs finished on Saturday, two days over plan.
 
-Water had been entering at the chimney for at least one season. The insulation underneath was soaked along a strip about 4 feet long, and the plywood above it had started to soften at the edges. Nothing had reached the ceiling yet.
+## Damage found
 
-## What we replaced
+| Area | Problem | Size |
+|---|---|---|
+| Chimney base | Flashing lifted, water entering | 1 opening |
+| North valley | Flashing lifted at the edge | 6 feet |
+| Decking under chimney | Soaked insulation, soft plywood edges | 4 feet by 3 feet |
 
-The contractor replaced the flashing first. After that he cut out the wet insulation (about 12 square feet in total) and left the exposed boards open to dry for two days. A moisture meter read 11 percent on Thursday, which sits inside the normal range for framing lumber, so he closed the section.
+Nothing reached the ceiling. The contractor found the stains on the decking during the walk.
 
-Drying took longer than the schedule allowed. On Friday morning the boards still read 14 percent near the lowest corner, so we waited another day. The contractor brought a dehumidifier from his truck and ran it overnight under a tarp. By Saturday the corner read 10 percent.
+## Repairs
 
-The finished work covers three items.
-
-- Flashing replaced at the chimney and along the north valley edge.
-- Wet insulation removed and the boards dried.
+- Flashing replaced at the chimney and along the north valley.
+- Wet insulation removed, about 12 square feet.
 - One loose gutter bracket reattached.
+
+## Drying readings
+
+| Day | Lowest corner | Normal range |
+|---|---|---|
+| Thursday | 14 percent | 9 to 12 percent |
+| Friday | 14 percent | 9 to 12 percent |
+| Saturday | 10 percent | 9 to 12 percent |
+
+A dehumidifier ran overnight under a tarp on Friday. The boards were closed on Saturday afternoon.
 
 ## Cost and schedule
 
-The final bill matched the written estimate within a small margin. Labor ran two days over the original plan because of the weather. Materials arrived on time. I expect the next inspection in October, after the ground freezes, and I will bring a ladder of my own this time.
+| Item | Plan | Actual |
+|---|---|---|
+| Labor | 3 days | 5 days |
+| Materials | On order | Arrived on time |
+| Bill | Written estimate | Within the estimate |
+
+The two extra days were rain.
 
 ## Next steps
 
-Gutters on the east side still need cleaning. Next month I will ask a neighbor about a shared ladder, since two of us now need to reach the same roofline.
+- Clean the east gutters this month.
+- Borrow the neighbor's long ladder for the east roofline.
+- Book the next inspection for October, after the ground freezes.

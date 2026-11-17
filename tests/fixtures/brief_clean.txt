@@ -1,0 +1,33 @@
+Delivery routes and pricing
+
+Prepared for the operations lead
+
+Route plan, page 1
+
+Summary
+
+Four zones replace the current eleven. Empty miles fall in every zone.
+
+Zone fees
+
+| Zone | Fee | Change |
+| North | Current fee | None |
+| South | Flat fee | Replaces the per-stop fee |
+| East | Flat fee | New zone |
+| West | Flat fee | New zone |
+
+Route plan, page 2
+
+Stops per shift
+
+| Zone | Old plan | New plan |
+| North | 14 | 18 |
+| South | 11 | 16 |
+
+Decisions needed
+
+Approve the four zones by Friday.
+
+Name one dispatcher to own the new map.
+
+Route plan, page 3

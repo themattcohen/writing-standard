@@ -2,14 +2,16 @@
 """Deterministic anti-AI-slop linter for the writing-standard skill.
 
 Usage:
-    python scripts/lint.py check PATH [PATH ...] [--mode prose|email|assistant|plain]
+    python scripts/lint.py check PATH [PATH ...] [--mode prose|brief|email|assistant|plain]
+                           [--from text|html] [--budget N] [--max-words N]
                            [--strict] [--json] [--banned PATH] [--name NAME] [--no-color]
     python scripts/lint.py rules [--json]
     python scripts/lint.py version
 
 The linter reads word and phrase lists from ``references/banned.md`` and applies
-structural rules (contrast frames, lead-ins, cadence, formatting) to text that
-has been masked so that code, URLs, front matter and link targets are never
+structural rules (contrast frames, lead-ins, cadence, formatting) and the
+executive-document rules (label headlines, no justification tics, short
+paragraphs, a word budget) to text that has been masked so that code, URLs, front matter and link targets are never
 judged. Masking replaces characters with spaces, so line and column numbers
 always refer to the original file.
 
@@ -21,20 +23,26 @@ from __future__ import annotations
 
 import argparse
 import bisect
+import html.parser
 import json
 import os
 import re
 import sys
+from collections import Counter
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable, Dict, Iterable, Iterator, List, Mapping, Optional, Pattern, Sequence, Tuple
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 
 MODES: Tuple[str, ...] = ("prose", "email", "assistant", "plain")
+# Accepted on the command line and by make_config; each maps to a mode in MODES.
+MODE_ALIASES: Mapping[str, str] = {"brief": "prose"}
+DEFAULT_BUDGET = 120
 ERROR = "ERROR"
 WARN = "WARN"
 TEXT_SUFFIXES = {".md", ".txt", ".markdown"}
+HTML_SUFFIXES = {".html", ".htm"}
 SKIP_DIRS = {"node_modules", "__pycache__"}
 
 EM_DASH = "\u2014"
@@ -115,6 +123,8 @@ _REGISTRY: List[Rule] = []
 ALL_MODES = frozenset(MODES)
 PEA = frozenset({"prose", "email", "assistant"})
 PE = frozenset({"prose", "email"})
+PROSE = frozenset({"prose"})
+EA = frozenset({"email", "assistant"})
 ASSISTANT = frozenset({"assistant"})
 EMAIL = frozenset({"email"})
 PLAIN = frozenset({"plain"})
@@ -131,7 +141,8 @@ QUOTE_SKIP_RULES = frozenset(
         "binary-contrast", "lead-in", "faux-insight", "rhetorical-setup", "colon-reveal",
         "ing-rider", "puffery", "weasel-attribution", "vague-association",
         "arguing-with-no-one", "false-agency", "fragment-stack", "negative-listing",
-        "likely-cause", "found-you-well",
+        "likely-cause", "found-you-well", "justification-tic", "thesis-sentence",
+        "process-narration", "chart-restatement", "headline-slogan",
     }
 )
 
@@ -354,14 +365,27 @@ class Config:
     matchers: Matchers
     name: Optional[str] = None
     signoff: Optional[str] = "Thanks,"
+    budget: int = DEFAULT_BUDGET
+    max_words: Optional[int] = None
 
 
 def make_config(
-    mode: str, banned: Banned, name: Optional[str] = None, signoff: Optional[str] = "Thanks,"
+    mode: str,
+    banned: Banned,
+    name: Optional[str] = None,
+    signoff: Optional[str] = "Thanks,",
+    budget: int = DEFAULT_BUDGET,
+    max_words: Optional[int] = None,
 ) -> Config:
+    mode = MODE_ALIASES.get(mode, mode)
     if mode not in MODES:
         raise LintError(f"unknown mode: {mode}")
-    return Config(mode=mode, matchers=build_matchers(banned), name=name or None, signoff=signoff or None)
+    if budget < 1 or (max_words is not None and max_words < 1):
+        raise LintError("--budget and --max-words take a positive number of words")
+    return Config(
+        mode=mode, matchers=build_matchers(banned), name=name or None, signoff=signoff or None,
+        budget=budget, max_words=max_words,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -622,6 +646,51 @@ def parse_blocks(text: str) -> List[Block]:
     return blocks
 
 
+PLAIN_HEADING_MAX_WORDS = 14
+
+
+def promote_plain_headings(blocks: List[Block], text: str) -> None:
+    """Treat short standalone lines as headings in text with no markdown headings.
+
+    Text extracted from a PDF or a rendered page loses its ``#`` markers, so a
+    one-line block that starts with a capital or digit, runs 14 words or fewer,
+    and ends without sentence punctuation becomes a heading. Page headers and
+    footers become ``furniture`` and are skipped by every rule: candidate lines
+    that, with digits removed, repeat on three or more lines, or whose first
+    three words repeat on five or more.
+    """
+    if any(b.kind == "heading" for b in blocks):
+        return
+    cands: List[Tuple[Block, str]] = []
+    for b in blocks:
+        if b.kind != "paragraph" or b.label:
+            continue
+        body = text[b.start : b.end].strip()
+        if not body or "\n" in body or body[-1] in ".!?:;," or body[0].islower():
+            continue
+        wc = count_words(body)
+        if 0 < wc <= PLAIN_HEADING_MAX_WORDS:
+            cands.append((b, body))
+
+    def key(body: str) -> Tuple[str, ...]:
+        return tuple(t.lower() for t in re.sub(r"\d+", "", body).split()[:3])
+
+    def whole(body: str) -> str:
+        return " ".join(re.sub(r"\d+", "", body).lower().split())
+
+    counts = Counter(key(body) for _, body in cands)
+    wholes = Counter(whole(body) for _, body in cands)
+    for b, body in cands:
+        k = key(body)
+        if wholes[whole(body)] >= 3 or (len(k) == 3 and counts[k] >= 5):
+            b.kind = "furniture"
+            b.sentences = []
+        else:
+            b.kind = "heading"
+            b.level = 2
+            b.sentences = [Sentence(b.start, b.end, body, count_words(body))]
+
+
 # ---------------------------------------------------------------------------
 # Document model
 # ---------------------------------------------------------------------------
@@ -677,6 +746,8 @@ class Doc:
                 body_end = self.line_starts[self.signoff_index]
         self.body_end = body_end
         self.blocks = parse_blocks(self.text[:body_end])
+        if self.mode == "prose":
+            promote_plain_headings(self.blocks, self.text)
         self.title_block = next(
             (b for b in self.blocks if b.kind == "heading" and b.level == 1), None
         )
@@ -706,6 +777,10 @@ class Doc:
 
     def block_text(self, b: Block) -> str:
         return self.text[b.start : b.end]
+
+    def quoted(self, b: Block) -> bool:
+        """True for a block that is entirely a quoted example (blockquote or Before:/After: line)."""
+        return not self.qtext[b.start : b.end].strip()
 
 
 # ---------------------------------------------------------------------------
@@ -1473,7 +1548,7 @@ def _heading_restated(doc: Doc) -> Iterator[Hit]:
             yield Hit(s.start, s.end)
 
 
-@rule("tiny-section", WARN, PEA, "A heading followed by fewer than two sentences before the next heading or end of file. The first H1, parent headings, and sections holding code or tables are exempt.", "section has fewer than two sentences; merge it or develop it")
+@rule("tiny-section", WARN, EA, "A heading followed by fewer than two sentences before the next heading or end of file. The first H1, parent headings, and sections holding code or tables are exempt. Not checked in prose, where executive sections are short by design.", "section has fewer than two sentences; merge it or develop it")
 def _tiny_section(doc: Doc) -> Iterator[Hit]:
     blocks = doc.blocks
     for i, b in enumerate(blocks):
@@ -1481,13 +1556,15 @@ def _tiny_section(doc: Doc) -> Iterator[Hit]:
             continue
         j = i + 1
         count = 0
+        has_table = False
         while j < len(blocks) and blocks[j].kind != "heading":
             if blocks[j].kind in ("paragraph", "list"):
                 count += len(blocks[j].sentences)
+            has_table = has_table or blocks[j].kind == "table"
             j += 1
         end = blocks[j].start if j < len(blocks) else len(doc.text)
         nxt_heading = blocks[j] if j < len(blocks) else None
-        if count >= 2:
+        if count >= 2 or has_table:
             continue
         if nxt_heading is not None and nxt_heading.level > b.level:
             continue
@@ -1652,6 +1729,375 @@ def _found_well(doc: Doc) -> Iterator[Hit]:
 
 
 # ---------------------------------------------------------------------------
+# Executive documents: the baseline for prose, partly for email
+# ---------------------------------------------------------------------------
+
+HEADLINE_MAX_WORDS = 5
+_HL_SENTENCE_VERB = re.compile(r"\b(?:is|are|was|were|will|has|have|does|do|can|must|should)\b", re.IGNORECASE)
+_HL_ASKING = re.compile(
+    r"^(?:why\b|(?:what|how|who|where|when)\s+(?:we|it|this|that|they|you|i|our|your|the|a|an|one|to)\b)",
+    re.IGNORECASE,
+)
+_HL_PARTICIPLE = re.compile(
+    r"(?<=\w)\W+(?:(?!(?:speed|bleed|breed|greed|embed|hundred)\b)[a-z]{3,}ed|built|made|held|kept|sold|paid|"
+    r"given|taken|chosen|driven|written|grown|shown|known)\s+(?:for|of|around|by|with|to)\s+the\b",
+    re.IGNORECASE,
+)
+_HL_METAPHOR = re.compile(
+    r"\b(?:sits|carries|anchors|unlocks|fuels|owns|earns|beats|shapes|meets|rides|tells|speaks|"
+    r"pays\s+off|wins\s+(?:it|the|them|this|that|on|over)|moves\s+the\s+needle|opens\s+the\s+door)\b",
+    re.IGNORECASE,
+)
+_HL_LIST = re.compile(r"^[\w'-]+(?:,\s*[\w'-]+)*,?\s+(?:and|or)\s+[\w'-]+$")
+
+
+def headline_problems(text: str) -> List[str]:
+    """Reasons a heading reads as a slogan rather than a literal label."""
+    t = text.strip()
+    wc = count_words(t)
+    out: List[str] = []
+    if t.endswith((".", "!")) or (wc >= 3 and _HL_SENTENCE_VERB.search(t)):
+        out.append("full sentence")
+    if "," in t:
+        second = t.split(",", 1)[1].strip()
+        if second[:1].islower() and count_words(second) >= 3 and not _HL_LIST.match(second):
+            out.append("comma-joined two-part")
+    if _HL_ASKING.match(t):
+        out.append("what/why/how framing")
+    if _HL_PARTICIPLE.search(t):  # mid-heading only: "Prepared for the board" is a label
+        out.append("poetic 'priced for the' construction")
+    if _HL_METAPHOR.search(t):
+        out.append("metaphor verb")
+    if wc > HEADLINE_MAX_WORDS:
+        out.append(f"{wc} words")
+    return out
+
+
+@rule(
+    "headline-slogan",
+    ERROR,
+    PROSE,
+    "A heading that is not a literal label: over five words, a full sentence, two parts joined by a comma, "
+    "a what/why/how framing, a 'priced for the' construction, or a metaphor verb. Markdown headings count, "
+    "and in text with no markdown headings so do short standalone lines.",
+    "headline reads as a slogan; use a literal label of five words or fewer",
+)
+def _headline_slogan(doc: Doc) -> Iterator[Hit]:
+    for h in doc.headings():
+        problems = headline_problems(doc.block_text(h))
+        if problems:
+            yield Hit(
+                h.start, h.end,
+                f"headline reads as a slogan ({', '.join(problems)}); use a literal label of five words or fewer",
+            )
+
+
+_JUSTIFY = re.compile(
+    _ap(
+        r"\bbecause\b|\bfor\s+(?:this|that)\s+reason\b|\b(?:which|that|this)\s+is\s+why\b"
+        r"|\b(?:that|this)@s\s+why\b|\b(?:which|that|this)\s+means\b|,\s+so\s+(?!far\b)|\bso\s+that\b"
+    ),
+    re.IGNORECASE,
+)
+
+
+@rule(
+    "justification-tic",
+    ERROR,
+    PE,
+    "Reasons attached to decisions: because, for this reason, which is why, that is why, which means, "
+    "that means, ', so', so that. A because-clause that carries a number is a warning.",
+    "justification tic; state the fact and drop the reason",
+)
+def _justification(doc: Doc) -> Iterator[Hit]:
+    for _, s in doc.sentences():
+        for m in _JUSTIFY.finditer(s.text):
+            word = m.group(0).lstrip(", \t\n")
+            start = s.start + m.end() - len(word)
+            end = s.start + m.end() - (len(word) - len(word.rstrip()))
+            if word.lower().startswith("because") and re.search(r"\d", s.text[m.end() :]):
+                yield Hit(start, end, "because-clause; keep it only if the reader needs its number", WARN)
+            else:
+                yield Hit(start, end)
+
+
+_ABSTRACT = (
+    r"(?:product|point|story|moat|strategy|offer|business|bet|message|brand|answer|problem|complaint|"
+    r"credential|premium|value|difference|advantage|edge|hook|promise|question|goal|opportunity|lever|"
+    r"engine|wedge|thesis|play|secret|key)"
+)
+_THESIS: Tuple[Pattern[str], ...] = tuple(
+    re.compile(_ap(p), re.IGNORECASE)
+    for p in (
+        r"\b(?:is|are|was)\s+the\s+(?:real\s+|whole\s+|only\s+|actual\s+)?(?:product|point|story|moat|strategy|"
+        r"offer|business|bet|message|brand|answer|hook|edge|lever|engine|thesis|play|game|secret|key)\b"
+        r"(?!\s+(?:of|to|for|on|in|at|from|with)\b)",
+        r"\bthe\s+" + _ABSTRACT + r"\s+(?:is|are)\s+the\s+[a-z]+(?=\s*(?:[.,;]|$)|\s+(?:where|when|and|but)\b)",
+        r"\bbuilt\s+around\b",
+        r"\bthe\s+whole\s+of\s+it\b|\bis\s+the\s+whole\s+(?:story|point|plan|game|thing)\b",
+        r"\bthe\s+rest\s+is\b",
+        r"\beverything\s+else\b[^.;]*?\b(?:is|follows|flows|depends|rests|hangs|comes)\b",
+        r"\bwe\s+(?:do\s+not|don@t|will\s+not|won@t)\s+try\b",
+        r"^(?:nobody|no\s+one)\s+(?:can|could|will|does|sells|offers)\b",
+    )
+)
+
+
+@rule(
+    "thesis-sentence",
+    ERROR,
+    PE,
+    "Aphorisms in place of facts: X is the product, the A is the B equations of abstract nouns, built around, "
+    "the whole of it, the rest is, everything else follows, nobody can, and we do not try.",
+    "thesis sentence; replace the aphorism with the fact or number behind it",
+)
+def _thesis(doc: Doc) -> Iterator[Hit]:
+    for _, s in doc.sentences(("paragraph", "list")):
+        for rx in _THESIS:
+            m = rx.search(s.text)
+            if m:
+                yield Hit(s.start + m.start(), s.start + m.end())
+                break
+
+
+_NARRATION_SRC = (
+    r"over\s+(?:the\s+(?:past|last)\s+)?(?:\d+|one|two|three|four|five|six|seven|eight|nine|ten|several|a\s+few)"
+    r"\s+(?:days|weeks|months|sessions|calls),?\s+we\b"
+    r"|we\s+(?:looked\s+(?:at|into)|built|rebuilt|reviewed|analy[sz]ed|researched|checked|spent|set\s+out|"
+    r"started\s+by|began\s+by|went\s+through|dug\s+into|pulled|gathered|compiled|studied|examined|explored|"
+    r"mapped|tested)"
+    r"|this\s+(?:page|document|brief|deck|memo|report|section|slide|one-pager|summary|analysis)"
+    r"|(?:in|on)\s+this\s+(?:page|document|brief|deck|memo|report|slide|one-pager)"
+)
+
+
+@rule(
+    "process-narration",
+    ERROR,
+    PE,
+    "Sentences that narrate the work or the document: Over four days we, We looked at, We built, We reviewed, "
+    "This page, This document, In this brief.",
+    "process narration; give the result, not how it was reached or where it sits",
+)
+def _narration(doc: Doc) -> Iterator[Hit]:
+    yield from _sentence_start_hits(doc, _NARRATION_SRC)
+
+
+_CHART_SRC = (
+    r"reading\s+the\b"
+    r"|(?:as\s+)?the\s+(?:chart|table|graph|figure|plot|diagram|exhibit)s?\s+(?:above\s+|below\s+)?"
+    r"(?:shows?|illustrates?|makes\s+clear|tells|says|compares)"
+    r"|as\s+shown\s+(?:in|on|above|below)"
+    r"|(?:looking\s+at|in)\s+the\s+(?:chart|table|graph|figure)\s+(?:above|below)"
+)
+
+
+@rule(
+    "chart-restatement",
+    ERROR,
+    PROSE,
+    "Prose that restates a chart or table: Reading the ..., The chart shows, As the table shows, As shown in.",
+    "restates the chart or table; cut it or keep the one number the visual cannot show",
+)
+def _chart(doc: Doc) -> Iterator[Hit]:
+    yield from _sentence_start_hits(doc, _CHART_SRC)
+
+
+PARAGRAPH_MAX_SENTENCES = 2
+PARAGRAPH_MAX_WORDS = 40
+BULLET_MAX_WORDS = 15
+
+
+@rule(
+    "paragraph-density",
+    ERROR,
+    PROSE,
+    "A paragraph over two sentences or 40 words; a list item over 15 words is a warning. "
+    "Blockquotes and Before:/After: example lines are skipped.",
+    "dense paragraph",
+)
+def _density(doc: Doc) -> Iterator[Hit]:
+    for b in doc.blocks:
+        if doc.quoted(b):
+            continue
+        if b.kind == "paragraph" and b.sentences:
+            n = len(b.sentences)
+            wc = count_words(doc.block_text(b))
+            if n > PARAGRAPH_MAX_SENTENCES or wc > PARAGRAPH_MAX_WORDS:
+                yield Hit(
+                    b.start, b.end,
+                    f"paragraph runs {n} sentence{'' if n == 1 else 's'} and {wc} words; keep it to "
+                    f"{PARAGRAPH_MAX_SENTENCES} sentences and {PARAGRAPH_MAX_WORDS} words, or use a table",
+                )
+        elif b.kind == "list":
+            wc = count_words(doc.block_text(b))
+            if wc > BULLET_MAX_WORDS:
+                yield Hit(b.start, b.end, f"bullet runs {wc} words; keep it to {BULLET_MAX_WORDS}", WARN)
+
+
+@dataclass(frozen=True)
+class Section:
+    heading: Optional[Block]
+    words: int
+
+
+def sections(doc: Doc) -> List[Section]:
+    """Prose words (paragraphs and list items, quoted examples excepted) under each heading, in order."""
+    out: List[Section] = []
+    head: Optional[Block] = None
+    words = 0
+    seen = False
+    for b in doc.blocks:
+        if b.kind == "heading":
+            if seen or head is not None:
+                out.append(Section(head, words))
+            head, words, seen = b, 0, False
+        elif b.kind in ("paragraph", "list") and not doc.quoted(b):
+            words += count_words(doc.block_text(b))
+            seen = True
+    if seen or head is not None:
+        out.append(Section(head, words))
+    return out
+
+
+def total_words(doc: Doc) -> int:
+    """Every word a reader sees: headings, paragraphs, list items, and table cells."""
+    return sum(
+        count_words(doc.block_text(b)) for b in doc.blocks if b.kind in ("heading", "paragraph", "list", "table")
+    )
+
+
+@rule(
+    "word-budget",
+    ERROR,
+    PROSE,
+    "A section whose paragraphs and list items, quoted examples excepted, exceed the budget (120 words, set with --budget), "
+    "or a document over --max-words when that flag is given (tables and headings count toward the total).",
+    "over the word budget",
+)
+def _budget(doc: Doc) -> Iterator[Hit]:
+    budget = doc.cfg.budget
+    for sec in sections(doc):
+        if sec.words <= budget:
+            continue
+        if sec.heading is not None:
+            a, b = sec.heading.start, sec.heading.end
+        else:
+            first = next(x for x in doc.blocks if x.kind in ("paragraph", "list"))
+            a, b = first.start, first.end
+        yield Hit(a, b, f"section has {sec.words} words of prose; the budget is {budget} (--budget)")
+    cap = doc.cfg.max_words
+    if cap is not None:
+        total = total_words(doc)
+        content = [x for x in doc.blocks if x.kind in ("heading", "paragraph", "list", "table")]
+        if total > cap and content:
+            yield Hit(content[0].start, content[0].end, f"document runs {total} words; the cap is {cap} (--max-words)")
+
+
+def word_report(path: str, raw: str, cfg: Config) -> Dict[str, object]:
+    """Total words and prose words per section, for the CLI's word-budget report."""
+    doc = Doc(path, raw, cfg)
+    rows = []
+    for sec in sections(doc):
+        label = " ".join(doc.block_text(sec.heading).split()) if sec.heading else "(before the first heading)"
+        line = doc.pos(sec.heading.start)[0] if sec.heading else 1
+        rows.append({"heading": label, "line": line, "words": sec.words})
+    return {"total": total_words(doc), "budget": cfg.budget, "max_words": cfg.max_words, "sections": rows}
+
+
+# ---------------------------------------------------------------------------
+# HTML input
+# ---------------------------------------------------------------------------
+
+
+class _HTMLText(html.parser.HTMLParser):
+    """Flatten HTML into the markdown shape the linter reads.
+
+    h1 to h6 become ``#`` headings, li items become ``- `` bullets, table rows
+    become ``| a | b |`` lines, and other block elements become paragraphs.
+    Script, style, head, svg, and template content is dropped.
+    """
+
+    SKIP = {"script", "style", "noscript", "template", "svg", "head", "title", "canvas", "iframe", "math"}
+    BLOCK = {
+        "p", "div", "section", "article", "header", "footer", "main", "aside", "blockquote", "ul", "ol",
+        "table", "thead", "tbody", "tfoot", "figure", "figcaption", "nav", "form", "dl", "dt", "dd", "pre",
+        "hr", "br", "body", "html", "caption", "details", "summary",
+    }
+    HEADINGS = {"h1": 1, "h2": 2, "h3": 3, "h4": 4, "h5": 5, "h6": 6}
+
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.out: List[str] = []
+        self.buf: List[str] = []
+        self.prefix = ""
+        self.skip = 0
+        self.cells: Optional[List[str]] = None
+        self.cell: Optional[List[str]] = None
+
+    def flush(self) -> None:
+        text = " ".join("".join(self.buf).split())
+        if text:
+            self.out.append(self.prefix + text)
+        self.buf = []
+        self.prefix = ""
+
+    def handle_starttag(self, tag: str, attrs: List[Tuple[str, Optional[str]]]) -> None:
+        if tag in self.SKIP:
+            self.skip += 1
+            return
+        if self.skip:
+            return
+        if tag in ("td", "th"):
+            if self.cells is None:
+                self.flush()
+                self.cells = []
+            self.cell = []
+        elif tag == "tr":
+            self.flush()
+            self.cells = []
+        elif tag in self.HEADINGS:
+            self.flush()
+            self.prefix = "#" * self.HEADINGS[tag] + " "
+        elif tag == "li":
+            self.flush()
+            self.prefix = "- "
+        elif tag in self.BLOCK and self.cell is None:
+            self.flush()
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag in self.SKIP:
+            self.skip = max(0, self.skip - 1)
+            return
+        if self.skip:
+            return
+        if tag in ("td", "th") and self.cell is not None and self.cells is not None:
+            self.cells.append(" ".join("".join(self.cell).split()))
+            self.cell = None
+        elif tag == "tr" and self.cells is not None:
+            if any(self.cells):
+                self.out.append("| " + " | ".join(self.cells) + " |")
+            self.cells = None
+            self.cell = None
+        elif (tag in self.HEADINGS or tag == "li" or tag in self.BLOCK) and self.cell is None:
+            self.flush()
+
+    def handle_data(self, data: str) -> None:
+        if self.skip:
+            return
+        (self.cell if self.cell is not None else self.buf).append(data)
+
+
+def html_to_text(raw: str) -> str:
+    """Extract lintable text from HTML; line numbers then refer to the extracted text."""
+    parser = _HTMLText()
+    parser.feed(raw)
+    parser.close()
+    parser.flush()
+    return "\n\n".join(parser.out) + "\n"
+
+
+# ---------------------------------------------------------------------------
 # Engine
 # ---------------------------------------------------------------------------
 
@@ -1661,6 +2107,7 @@ SPECIFIC_OVER_GENERIC: Mapping[str, Tuple[str, ...]] = {
     "watched-phrase": ("jargon", "arguing-with-no-one"),
     "banned-phrase": ("lead-in", "candor", "faux-insight"),
     "colon-reveal": ("lead-in",),
+    "kicker": ("thesis-sentence",),
 }
 
 
@@ -1721,8 +2168,11 @@ def _read_source(label: str, path: Optional[Path]) -> str:
         raise LintError(f"cannot read {label}: {exc}") from exc
 
 
-def collect_inputs(paths: Sequence[str]) -> List[Tuple[str, Optional[Path]]]:
+def collect_inputs(
+    paths: Sequence[str], suffixes: Iterable[str] = TEXT_SUFFIXES
+) -> List[Tuple[str, Optional[Path]]]:
     """Expand CLI paths into (display label, Path or None for stdin)."""
+    suffixes = set(suffixes)
     items: List[Tuple[str, Optional[Path]]] = []
     for p in paths:
         if p == "-":
@@ -1734,7 +2184,7 @@ def collect_inputs(paths: Sequence[str]) -> List[Tuple[str, Optional[Path]]]:
             for root, dirs, files in os.walk(path):
                 dirs[:] = sorted(d for d in dirs if not d.startswith(".") and d not in SKIP_DIRS)
                 for f in sorted(files):
-                    if Path(f).suffix.lower() in TEXT_SUFFIXES:
+                    if Path(f).suffix.lower() in suffixes:
                         found.append(Path(root) / f)
             items.extend((str(f), f) for f in found)
         elif path.is_file():
@@ -1756,10 +2206,14 @@ def _use_color(args: argparse.Namespace) -> bool:
 
 def cmd_check(args: argparse.Namespace) -> int:
     banned_path = Path(args.banned) if args.banned else default_banned_path()
-    cfg = make_config(args.mode, load_banned(banned_path), args.name, args.signoff)
-    inputs = collect_inputs(args.paths)
+    cfg = make_config(
+        args.mode, load_banned(banned_path), args.name, args.signoff, args.budget, args.max_words
+    )
+    from_html = args.from_format == "html"
+    inputs = collect_inputs(args.paths, HTML_SUFFIXES if from_html else TEXT_SUFFIXES)
     findings: List[Finding] = []
     labels: List[str] = []
+    reports: Dict[str, Dict[str, object]] = {}
     banned_resolved = banned_path.resolve()
     skipped: List[str] = []
     for label, path in inputs:
@@ -1767,7 +2221,12 @@ def cmd_check(args: argparse.Namespace) -> int:
             skipped.append(label)
             continue
         labels.append(label)
-        findings.extend(lint_text(label, _read_source(label, path), cfg))
+        raw = _read_source(label, path)
+        if from_html:
+            raw = html_to_text(raw)
+        findings.extend(lint_text(label, raw, cfg))
+        if cfg.mode == "prose":
+            reports[label] = word_report(label, raw, cfg)
     findings.sort(key=Finding.sort_key)
     errors = sum(1 for f in findings if f.severity == ERROR)
     warnings = sum(1 for f in findings if f.severity == WARN)
@@ -1778,6 +2237,8 @@ def cmd_check(args: argparse.Namespace) -> int:
             "errors": errors,
             "warnings": warnings,
         }
+        if reports:
+            payload["words"] = reports
         sys.stdout.write(json.dumps(payload, indent=2) + "\n")
     else:
         for label in skipped:
@@ -1787,6 +2248,13 @@ def cmd_check(args: argparse.Namespace) -> int:
         for f in findings:
             sev = f"{paint[f.severity]}{f.severity}\x1b[0m" if color else f.severity
             sys.stdout.write(f'{f.path}:{f.line}:{f.col}: {sev} [{f.rule}] {f.message}: "{f.text}"\n')
+        for label, rep in reports.items():
+            secs = rep["sections"]
+            over = sum(1 for x in secs if x["words"] > cfg.budget)  # type: ignore[index]
+            sys.stdout.write(
+                f"{label}: {rep['total']} words, {len(secs)} sections, "  # type: ignore[arg-type]
+                f"{over} over the {cfg.budget}-word section budget\n"
+            )
         sys.stdout.write(f"{errors} errors, {warnings} warnings in {len(labels)} files\n")
     if errors or (args.strict and warnings):
         return 1
@@ -1827,12 +2295,39 @@ def cmd_version(_: argparse.Namespace) -> int:
     return 0
 
 
+def _positive(value: str) -> int:
+    try:
+        n = int(value)
+    except ValueError:
+        n = 0
+    if n < 1:
+        raise argparse.ArgumentTypeError(f"expected a positive whole number, got {value!r}")
+    return n
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="lint.py", description="Deterministic anti-AI-slop linter.")
     sub = parser.add_subparsers(dest="command", required=True)
     chk = sub.add_parser("check", help="lint files, directories, or stdin (-)")
     chk.add_argument("paths", nargs="+", metavar="PATH")
-    chk.add_argument("--mode", choices=MODES, default="prose")
+    chk.add_argument(
+        "--mode",
+        choices=list(MODES) + list(MODE_ALIASES),
+        default="prose",
+        help="prose (default) applies the executive-document rules; brief is the same as prose",
+    )
+    chk.add_argument(
+        "--from",
+        dest="from_format",
+        choices=("text", "html"),
+        default="text",
+        help="html strips tags first: h1 to h6 count as headings, tr rows become table lines",
+    )
+    chk.add_argument(
+        "--budget", type=_positive, default=DEFAULT_BUDGET, metavar="N",
+        help=f"prose words allowed per section (default {DEFAULT_BUDGET})",
+    )
+    chk.add_argument("--max-words", type=_positive, default=None, metavar="N", help="cap on the document total")
     chk.add_argument("--strict", action="store_true", help="exit 1 on warnings too")
     chk.add_argument("--json", action="store_true", help="emit JSON only")
     chk.add_argument("--banned", metavar="PATH", help="path to banned.md")
